@@ -1,16 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Network.Apiary
-    ( parseApib
-    ) where
+module Network.Apiary (parseApib) where
 
-import Network.Wreq (postWith, defaults, header, Response, responseBody)
-import Control.Lens ((&), (.~), (^.))
-import Data.ByteString.Lazy (ByteString)
+import           Control.Lens         ((&), (.~), (^.))
+import           Data.ByteString.Lazy (ByteString)
+import           Network.Wreq         (Response, defaults, header, postWith,
+                                       responseBody)
 
 parseApib :: ByteString -> IO ByteString
 parseApib =
-    fmap (^. responseBody) . postWith apiaryOpts apiaryUrl
+  fmap (^. responseBody) . postWith apiaryOpts apiaryUrl
   where
     apiaryUrl = "https://api.apiblueprint.org/parser"
     apiaryAccept = "application/vnd.refract.parse-result+json"

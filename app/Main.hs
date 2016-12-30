@@ -1,8 +1,8 @@
 module Main where
 
-import Network.Apiary (parseApib)
-import Data.Apiary (decodeJson)
-import Data.ByteString.Lazy as B (readFile)
+import           Data.Apiary          (decodeJson)
+import           Data.ByteString.Lazy as B (readFile)
+import           Network.Apiary       (parseApib)
 
 main :: IO ()
 main = do
