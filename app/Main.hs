@@ -1,10 +1,10 @@
 module Main where
 
-import           Data.Apiary          (decodeJson)
 import           Data.ByteString.Lazy as B (readFile)
+import           Data.Json            (decodeJson)
 import           Network.Apiary       (parseApib)
 
 main :: IO ()
 main = do
   resp <- parseApib =<< B.readFile "simple.apib"
-  putStrLn . show . decodeJson $ resp
+  print . decodeJson $ resp
