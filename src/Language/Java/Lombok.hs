@@ -14,6 +14,9 @@ generateAst schema =
             [Private]
             (RefType (ClassRefType (ClassType [(Ident "String", [])])))
             [VarDecl (VarId (Ident "id")) Nothing])
-        ]
-     ))
-   ]
+        , MemberDecl (FieldDecl
+            [Private]
+            (RefType (ClassRefType (ClassType [
+              (Ident "List", [ActualType (ClassRefType (ClassType [(Ident "Widget", [])]))])])))
+            [VarDecl (VarId (Ident "widgets")) Nothing])
+        ]))]
