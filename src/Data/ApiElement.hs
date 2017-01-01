@@ -5,7 +5,6 @@ module Data.ApiElement (isASchema, jsonSchema) where
 import           Control.Monad
 import           Data.Aeson
 import           Data.ByteString.Lazy (fromStrict)
-import qualified Data.ByteString.Lazy as BL (ByteString, pack, unpack)
 import           Data.Either          (either)
 import qualified Data.HashMap.Strict  as HMS (HashMap, fromList, lookup)
 import           Data.Json            (decodeJson)

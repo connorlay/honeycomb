@@ -1,0 +1,21 @@
+{
+  "title": "Complex",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "widgets": {
+      "type": "array",
+      "items": {
+        "title": "Widget",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

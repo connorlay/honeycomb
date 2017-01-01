@@ -28,6 +28,7 @@ extra-deps:
 - connection-0.2.6
 - contravariant-1.4
 - cookie-0.4.2.1
+- cpphs-1.20.2
 - crypto-api-0.13.2
 - crypto-pubkey-types-0.4.3
 - cryptohash-0.11.9
@@ -52,12 +53,15 @@ extra-deps:
 - http-client-tls-0.2.4.1
 - http-types-0.9.1
 - kan-extensions-5.0.1
+- language-java-0.2.8
 - lens-4.15.1
 - lens-aeson-1.0.0.5
 - memory-0.14
 - mime-types-0.1.0.7
 - old-locale-1.0.0.7
+- old-time-1.1.0.3
 - pem-0.2.2
+- polyparse-1.12
 - prelude-extras-0.4.0.3
 - profunctors-5.2
 - psqueues-0.2.2.3
