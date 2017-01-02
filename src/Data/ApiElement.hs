@@ -17,21 +17,21 @@ import qualified Data.Vector          as V (elem, fromList)
 isASchema :: Value -> Bool
 isASchema v =
   fromMaybe False
-    $ fmap (arrayElem (String "messageBodySchema"))
-    $ join
-    $ objectLookup "classes"
-   <$> objectLookup "meta" v
+  $ fmap (arrayElem (String "messageBodySchema"))
+  $ join
+  $ objectLookup "classes"
+ <$> objectLookup "meta" v
 
 jsonSchema :: Value -> Maybe Value
 jsonSchema v =
   join
-    $ fmap (either (\_ -> Nothing) (\v -> Just v))
-    $ fmap decodeJson
-    $ fmap fromStrict
-    $ fmap encodeUtf8
-    $ join
-    $ asText
-   <$> objectLookup "content" v
+  $ fmap (either (\_ -> Nothing) (\v -> Just v))
+  $ fmap decodeJson
+  $ fmap fromStrict
+  $ fmap encodeUtf8
+  $ join
+  $ asText
+ <$> objectLookup "content" v
 
 objectLookup :: Text -> Value -> Maybe Value
 objectLookup k (Object m) = k `HMS.lookup` m
