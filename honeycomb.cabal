@@ -29,6 +29,7 @@ library
                      , vector >= 0.11
                      , text >= 1.2
                      , language-java >= 0.2
+                     , hjsonschema >= 1.2.0.2
   default-language:    Haskell2010
 
 executable honeycomb
@@ -45,6 +46,7 @@ executable honeycomb
                      , vector >= 0.11
                      , text >= 1.2
                      , language-java >= 0.2
+                     , hjsonschema >= 1.2.0.2
   default-language:    Haskell2010
 
 test-suite honeycomb-test

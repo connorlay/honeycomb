@@ -1,9 +1,8 @@
-module Language.Java.Lombok (generateAst, Schema) where
+module Language.Java.Lombok (generateAst) where
 
-import           Data.Aeson           (Value)
+import           Data.Aeson                    (Value)
+import           Data.JsonSchema.Draft4.Schema (Schema)
 import           Language.Java.Syntax
-
-type Schema = Value
 
 generateAst :: Schema -> CompilationUnit
 generateAst schema =
