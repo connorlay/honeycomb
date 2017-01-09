@@ -5,9 +5,12 @@ module Language.Java.Lombok (generateAst) where
 import           Data.Aeson                    (Value)
 import           Data.HashMap.Lazy             (HashMap, toList)
 import           Data.JsonSchema.Draft4.Schema (Schema (..))
-import           Data.Text                     (Text)
+import           Data.Maybe                    (fromMaybe)
+import           Data.Text                     (Text, unpack)
+import           Data.Validator.Draft4.Any     (TypeValidator (..))
 import           Language.Java.Syntax
 
+{-
 generateAst :: Schema -> CompilationUnit
 generateAst schema =
   CompilationUnit
@@ -57,6 +60,23 @@ generateAst schema =
                            ])))
               ]))
     ]
+    -}
+
+generateAst :: Schema -> CompilationUnit
+generateAst schema =
+  CompilationUnit
+    Nothing
+    [ ImportDecl False (Name [Ident "java", Ident "util", Ident "List"]) False
+    , ImportDecl False (Name [Ident "lombok", Ident "Data"]) False
+    ]
+    [ ClassTypeDecl
+        (ClassDecl
+           [Annotation MarkerAnnotation { annName = Name [Ident "Data"] }, Public]
+           (Ident "Complex")
+           []
+           Nothing
+           []
+           (ClassBody . toFields $ schema))]
 
 toFields :: Schema -> [Decl]
 toFields schema =
@@ -68,13 +88,19 @@ type Property = (Text, Schema)
 
 toField :: Property -> Decl
 toField (name, schema) =
-  undefined
+  let
+    javaType = fromMaybe "Object" (jsToJava <$> _schemaType schema)
+    in MemberDecl
+        (FieldDecl
+          [Private]
+          (RefType (ClassRefType (ClassType [(Ident . unpack $ javaType, [])])))
+          [VarDecl (VarId (Ident . unpack $ name)) Nothing])
 
-jsToJava :: Text -> Maybe Text
+jsToJava :: TypeValidator -> Text
 jsToJava js =
   case js of
-    "string"  -> Just "String"
-    "array"   -> Just "List"
-    "number"  -> Just "Double"
-    "boolean" -> Just "Boolean"
-    _         -> Nothing
+    TypeValidatorString "string"  -> "String"
+    TypeValidatorString "array"   -> "List"
+    TypeValidatorString "number"  -> "Double"
+    TypeValidatorString "boolean" -> "Boolean"
+    _                             -> "Object"
