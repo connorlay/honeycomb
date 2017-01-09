@@ -23,4 +23,4 @@ findJsonSchemas x =
 
 parseJsonSchemas :: [Value] -> [Maybe Schema]
 parseJsonSchemas xs =
-  map (jsonSchema) xs
+  map (asJsonSchema) xs

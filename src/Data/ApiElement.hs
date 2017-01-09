@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Data.ApiElement (isASchema, jsonSchema) where
+module Data.ApiElement (isASchema, asJsonSchema) where
 
 import           Control.Monad
 import           Data.Aeson
@@ -18,16 +18,16 @@ import qualified Data.Vector                   as V (elem, fromList)
 {- TODO: refactor with Lenses? -}
 isASchema :: Value -> Bool
 isASchema v =
-  fromMaybe False $ fmap (arrayElem (String "messageBodySchema")) $ join $ objectLookup "classes"
-                                                                           <$> objectLookup "meta" v
+  maybe False (arrayElem $ String "messageBodySchema")
+    (objectLookup "classes" =<< objectLookup "meta" v)
 
-jsonSchema :: Value -> Maybe Schema
-jsonSchema v =
-  join $ fmap (either (\_ -> Nothing) (\v -> Just v)) $ fmap decodeJson $ fmap fromStrict $ fmap
-                                                                                              encodeUtf8 $ join $ asText
-                                                                                                                  <$> objectLookup
-                                                                                                                        "content"
-                                                                                                                        v
+asJsonSchema :: Value -> Maybe Schema
+asJsonSchema v =
+  either (\_ -> Nothing) (\v -> Just v)
+  <$> decodeJson
+  =<< fromStrict
+      <$> encodeUtf8
+      <$> (asText =<< objectLookup "content" v)
 
 objectLookup :: Text -> Value -> Maybe Value
 objectLookup k (Object m) = k `HMS.lookup` m

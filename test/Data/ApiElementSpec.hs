@@ -26,35 +26,43 @@ spec = do
                      ])
 
       let Success schema = fromJSON $ Object
-                     (HMS.fromList
-                        [ ("type", String "object")
-                        , ("properties", Object
-                                           (HMS.fromList
-                                              [ ("id", Object
-                                                         (HMS.fromList [("type", String "string")]))
-                                              , ("title", Object
-                                                            (HMS.fromList
-                                                               [("type", String "string")]))
-                                              , ("content", Object
+                                        (HMS.fromList
+                                           [ ("type", String "object")
+                                           , ("properties", Object
                                                               (HMS.fromList
-                                                                 [("type", String "string")]))
-                                              , ("tags", Object
-                                                           (HMS.fromList
-                                                              [ ("type", String "array")
-                                                              , ("items", Object
+                                                                 [ ("id", Object
                                                                             (HMS.fromList
                                                                                [ ("type", String
                                                                                             "string")
                                                                                ]))
-                                                              ]))
-                                              ]))
-                        ])
+                                                                 , ("title", Object
+                                                                               (HMS.fromList
+                                                                                  [ ("type", String
+                                                                                               "string")
+                                                                                  ]))
+                                                                 , ("content", Object
+                                                                                 (HMS.fromList
+                                                                                    [ ("type", String
+                                                                                                 "string")
+                                                                                    ]))
+                                                                 , ("tags", Object
+                                                                              (HMS.fromList
+                                                                                 [ ("type", String
+                                                                                              "array")
+                                                                                 , ("items", Object
+                                                                                               (HMS.fromList
+                                                                                                  [ ("type", String
+                                                                                                               "string")
+                                                                                                  ]))
+                                                                                 ]))
+                                                                 ]))
+                                           ])
 
       it "should return true" $ do
         isASchema ast `shouldBe` True
 
       it "should extract the json schema" $ do
-        jsonSchema ast `shouldBe` Just schema
+        asJsonSchema ast `shouldBe` Just schema
 
     context "when there is no schema" $ do
       let ast = Object
@@ -73,4 +81,4 @@ spec = do
         isASchema ast `shouldBe` False
 
       it "should not extract the json schema" $ do
-        jsonSchema ast `shouldBe` Nothing
+        asJsonSchema ast `shouldBe` Nothing
