@@ -1,19 +1,23 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Language.Java.Lombok (generateAst) where
 
 import           Data.Aeson                    (Value)
-import           Data.JsonSchema.Draft4.Schema (Schema)
+import           Data.HashMap.Lazy             (HashMap, toList)
+import           Data.JsonSchema.Draft4.Schema (Schema (..))
+import           Data.Text                     (Text)
 import           Language.Java.Syntax
 
 generateAst :: Schema -> CompilationUnit
 generateAst schema =
   CompilationUnit
     Nothing
-    [ ImportDecl False (Name [(Ident "java"), (Ident "util"), (Ident "List")]) False
-    , ImportDecl False (Name [(Ident "lombok"), (Ident "Data")]) False
+    [ ImportDecl False (Name [Ident "java", Ident "util", Ident "List"]) False
+    , ImportDecl False (Name [Ident "lombok", Ident "Data"]) False
     ]
     [ ClassTypeDecl
         (ClassDecl
-           [Annotation (MarkerAnnotation { annName = Name [Ident "Data"] }), Public]
+           [Annotation MarkerAnnotation { annName = Name [Ident "Data"] }, Public]
            (Ident "Complex")
            []
            Nothing
@@ -36,7 +40,7 @@ generateAst schema =
               , MemberDecl
                   (MemberClassDecl
                      (ClassDecl
-                        [ Annotation (MarkerAnnotation { annName = Name [Ident "Data"] })
+                        [ Annotation MarkerAnnotation { annName = Name [Ident "Data"] }
                         , Public
                         , Static
                         ]
@@ -53,3 +57,24 @@ generateAst schema =
                            ])))
               ]))
     ]
+
+toFields :: Schema -> [Decl]
+toFields schema =
+  case _schemaProperties schema of
+    Nothing -> []
+    Just m  -> map toField . toList $ m
+
+type Property = (Text, Schema)
+
+toField :: Property -> Decl
+toField (name, schema) =
+  undefined
+
+jsToJava :: Text -> Maybe Text
+jsToJava js =
+  case js of
+    "string"  -> Just "String"
+    "array"   -> Just "List"
+    "number"  -> Just "Double"
+    "boolean" -> Just "Boolean"
+    _         -> Nothing
