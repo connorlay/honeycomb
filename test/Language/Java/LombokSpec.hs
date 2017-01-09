@@ -12,7 +12,7 @@ spec :: Spec
 spec = do
   describe "Generating Java code from a schema" $ do
     context "with Lombok annotations" $ do
-      let schema = Object
+      let Success schema = fromJSON $ Object
                      (fromList
                         [ ("title", String "Complex")
                         , ("type", String "object")

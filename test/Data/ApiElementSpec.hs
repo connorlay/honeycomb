@@ -25,7 +25,7 @@ spec = do
                      , ("element", String "asset")
                      ])
 
-      let schema = Object
+      let Success schema = fromJSON $ Object
                      (HMS.fromList
                         [ ("type", String "object")
                         , ("properties", Object
