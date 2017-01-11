@@ -30,6 +30,7 @@ library
                      , text >= 1.2
                      , language-java >= 0.2
                      , hjsonschema >= 1.2.0.2
+                     , countable-inflections >= 0.2.0
   default-language:    Haskell2010
 
 executable honeycomb
@@ -47,6 +48,7 @@ executable honeycomb
                      , text >= 1.2
                      , language-java >= 0.2
                      , hjsonschema >= 1.2.0.2
+                     , countable-inflections >= 0.2.0
   default-language:    Haskell2010
 
 test-suite honeycomb-test

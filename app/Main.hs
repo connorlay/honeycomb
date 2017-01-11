@@ -7,6 +7,8 @@ import           Data.Json                     (decodeJson)
 import           Data.JsonSchema.Draft4.Schema (Schema)
 import           Network.Apiary                (parseApib)
 import           Search.DepthFirstSearch
+import Language.Java.Lombok
+import Language.Java.Pretty
 
 main :: IO ()
 main = do
@@ -15,7 +17,7 @@ main = do
     Left msg ->
       print msg
     Right v ->
-      print . parseJsonSchemas . findJsonSchemas $ v
+      print $ map (fmap (prettyPrint . generateAst)) (parseJsonSchemas . findJsonSchemas $ v)
 
 findJsonSchemas :: Value -> [Value]
 findJsonSchemas x =
@@ -24,3 +26,4 @@ findJsonSchemas x =
 parseJsonSchemas :: [Value] -> [Maybe Schema]
 parseJsonSchemas xs =
   map (asJsonSchema) xs
+

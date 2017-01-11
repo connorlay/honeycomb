@@ -6,9 +6,12 @@ import           Data.Aeson                    (Value)
 import           Data.HashMap.Lazy             (HashMap, toList)
 import           Data.JsonSchema.Draft4.Schema (Schema (..))
 import           Data.Maybe                    (fromMaybe)
-import           Data.Text                     (Text, unpack)
+import           Data.Maybe                    (fromJust)
+import           Data.Text                     (Text, toTitle, unpack)
 import           Data.Validator.Draft4.Any     (TypeValidator (..))
+import           Data.Validator.Draft4.Array   (Items (..))
 import           Language.Java.Syntax
+import           Text.Countable                (singularize)
 
 {-
 generateAst :: Schema -> CompilationUnit
@@ -61,7 +64,6 @@ generateAst schema =
               ]))
     ]
 -}
-
 generateAst :: Schema -> CompilationUnit
 generateAst schema =
   CompilationUnit
@@ -76,30 +78,47 @@ generateAst schema =
            []
            Nothing
            []
-           (ClassBody . toFields $ schema))]
+           (ClassBody . toFields $ schema))
+    ]
 
 toFields :: Schema -> [Decl]
-toFields schema = case _schemaProperties schema of
-  Nothing -> []
-  Just m  -> map toField . toList $ m
+toFields schema =
+  case _schemaProperties schema of
+    Nothing -> []
+    Just m  -> map toField . toList $ m
 
 type JavaType = (Ident, [TypeArgument])
+
 type PropName = Text
 
 toField :: (PropName, Schema) -> Decl
 toField (propName, schema) =
   MemberDecl
-    (FieldDecl
-      [Private]
-      (RefType (ClassRefType (ClassType [toJavaType (propName, schema)])))
-      [VarDecl (VarId (Ident . unpack $ propName)) Nothing])
+    (FieldDecl [Private] (RefType (ClassRefType (ClassType [toJavaType (propName, schema)])))
+       [VarDecl (VarId (Ident . unpack $ propName)) Nothing])
 
 toJavaType :: (PropName, Schema) -> JavaType
 toJavaType (propName, schema) =
   case _schemaType schema of
-    Just (TypeValidatorString "array")   -> (Ident "List", [ActualType (ClassRefType (ClassType []))])
-    Just (TypeValidatorString "object")  -> (Ident . unpack $ propName, [])
-    Just (TypeValidatorString "string")  -> (Ident "String", [])
+    Just (TypeValidatorString "string") -> (Ident "String", [])
     Just (TypeValidatorString "boolean") -> (Ident "Boolean", [])
-    Just (TypeValidatorString "number")  -> (Ident "Double", [])
-    _                                    -> (Ident "Object", [])
+    Just (TypeValidatorString "number") -> (Ident "Double", [])
+    Just (TypeValidatorString "object") -> (Ident . toJavaClassName $ propName, [])
+    Just (TypeValidatorString "array") -> (Ident "List", [ ActualType
+                                                             (ClassRefType
+                                                                (ClassType
+                                                                   [ toJavaType
+                                                                       (propName, fromJust . toArraySubtype $ schema)
+                                                                   ]))
+                                                         ])
+    _ -> (Ident "Object", [])
+
+toArraySubtype :: Schema -> Maybe Schema
+toArraySubtype schema =
+  case _schemaItems schema of
+    Just (ItemsObject subschema) -> Just subschema
+    _                            -> Nothing
+
+toJavaClassName :: Text -> String
+toJavaClassName =
+  unpack . toTitle . singularize
