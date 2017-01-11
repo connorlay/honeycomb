@@ -60,7 +60,7 @@ generateAst schema =
                            ])))
               ]))
     ]
-    -}
+-}
 
 generateAst :: Schema -> CompilationUnit
 generateAst schema =
@@ -79,28 +79,27 @@ generateAst schema =
            (ClassBody . toFields $ schema))]
 
 toFields :: Schema -> [Decl]
-toFields schema =
-  case _schemaProperties schema of
-    Nothing -> []
-    Just m  -> map toField . toList $ m
+toFields schema = case _schemaProperties schema of
+  Nothing -> []
+  Just m  -> map toField . toList $ m
 
-type Property = (Text, Schema)
+type JavaType = (Ident, [TypeArgument])
+type PropName = Text
 
-toField :: Property -> Decl
-toField (name, schema) =
-  let
-    javaType = fromMaybe "Object" (jsToJava <$> _schemaType schema)
-    in MemberDecl
-        (FieldDecl
-          [Private]
-          (RefType (ClassRefType (ClassType [(Ident . unpack $ javaType, [])])))
-          [VarDecl (VarId (Ident . unpack $ name)) Nothing])
+toField :: (PropName, Schema) -> Decl
+toField (propName, schema) =
+  MemberDecl
+    (FieldDecl
+      [Private]
+      (RefType (ClassRefType (ClassType [toJavaType (propName, schema)])))
+      [VarDecl (VarId (Ident . unpack $ propName)) Nothing])
 
-jsToJava :: TypeValidator -> Text
-jsToJava js =
-  case js of
-    TypeValidatorString "string"  -> "String"
-    TypeValidatorString "array"   -> "List"
-    TypeValidatorString "number"  -> "Double"
-    TypeValidatorString "boolean" -> "Boolean"
-    _                             -> "Object"
+toJavaType :: (PropName, Schema) -> JavaType
+toJavaType (propName, schema) =
+  case _schemaType schema of
+    Just (TypeValidatorString "array")   -> (Ident "List", [ActualType (ClassRefType (ClassType []))])
+    Just (TypeValidatorString "object")  -> (Ident . unpack $ propName, [])
+    Just (TypeValidatorString "string")  -> (Ident "String", [])
+    Just (TypeValidatorString "boolean") -> (Ident "Boolean", [])
+    Just (TypeValidatorString "number")  -> (Ident "Double", [])
+    _                                    -> (Ident "Object", [])
