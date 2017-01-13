@@ -20,6 +20,7 @@ library
                      , Search.DepthFirstSearch
                      , Data.ApiElement
                      , Language.Java.Lombok
+                     , Language.Java
   build-depends:       base >= 4.7 && < 5
                      , aeson >= 1.0
                      , wreq >= 0.4
