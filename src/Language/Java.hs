@@ -2,7 +2,7 @@
 
 module Language.Java (toJava) where
 
-import Data.HashMap.Lazy (HashMap(..), empty)
+import Data.HashMap.Lazy (HashMap(..), empty, toList)
 import Data.Text (Text(..), toTitle, unpack)
 import Language.Java.Syntax
 import Data.JsonSchema.Draft4.Schema (Schema (..))
@@ -25,21 +25,33 @@ toJava name schema =
 
 toClassMembers :: HashMap Text Schema -> [Decl]
 toClassMembers m =
+  [toField, toGetter, toSetter] <*> toList m
+
+toField :: (Text, Schema) -> Decl
+toField (name, schema) =
+  MemberDecl $
+    FieldDecl
+      [Private]
+      (RefType . ClassRefType . toType $ (name, schema))
+      [VarDecl (VarId (Ident . unpack $ name)) Nothing]
+
+toInnerClass :: (Text, Schema) -> Decl
+toInnerClass (name, schema) =
   undefined
 
-toField :: Text -> Schema -> Decl
-toField name schema =
+toGetter :: (Text, Schema) -> Decl
+toGetter (name, schema) =
   undefined
 
-toInnerClass :: Text -> Schema -> Decl
-toInnerClass name schema =
+toSetter :: (Text, Schema) -> Decl
+toSetter (name, schema) =
   undefined
 
-typeOf :: Schema -> (Ident, [TypeArgument])
-typeOf schema =
+toType :: (Text, Schema) -> ClassType
+toType schema =
   undefined
 
-toClassIdent :: Text -> Text
-toClassIdent =
+toTypeIdent :: Text -> Text
+toTypeIdent =
   toTitle . singularize
 
