@@ -9,7 +9,7 @@ import           Data.Vector         as V (fromList)
 import           Test.Hspec
 
 spec :: Spec
-spec = do
+spec =
   describe "Detecting json schema objects" $ do
     context "when there is a schema" $ do
       let ast = Object
@@ -58,10 +58,10 @@ spec = do
                                                                  ]))
                                            ])
 
-      it "should return true" $ do
+      it "should return true" $
         isASchema ast `shouldBe` True
 
-      it "should extract the json schema" $ do
+      it "should extract the json schema" $
         asJsonSchema ast `shouldBe` Just schema
 
     context "when there is no schema" $ do
@@ -77,8 +77,8 @@ spec = do
                      , ("element", String "asset")
                      ])
 
-      it "should return false" $ do
+      it "should return false" $
         isASchema ast `shouldBe` False
 
-      it "should not extract the json schema" $ do
+      it "should not extract the json schema" $
         asJsonSchema ast `shouldBe` Nothing

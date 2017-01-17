@@ -2,44 +2,59 @@
 
 module Language.Java (toJava) where
 
-import Data.Validator.Draft4.Any (TypeValidator (..))
-import Data.Validator.Draft4.Array (Items (..))
-import Data.HashMap.Lazy (HashMap(..), empty, toList)
-import Data.Text (Text(..), toTitle, unpack)
-import Language.Java.Syntax
-import Data.JsonSchema.Draft4.Schema (Schema (..))
-import Text.Countable (singularize)
-import Data.Maybe (fromMaybe, fromJust)
+import           Data.HashMap.Lazy             (HashMap (..), empty, toList)
+import           Data.JsonSchema.Draft4.Schema (Schema (..))
+import           Data.Maybe                    (fromJust, fromMaybe, mapMaybe)
+import           Data.Text                     (Text (..), toTitle, unpack)
+import           Data.Validator.Draft4.Any     (TypeValidator (..))
+import           Data.Validator.Draft4.Array   (Items (..))
+import           Debug.Trace
+import           Language.Java.Syntax
+import           Text.Countable                (singularize)
 
 toJava :: Text -> Schema -> CompilationUnit
 toJava name schema =
-  CompilationUnit
-    Nothing
-    [] {- Imports go here -}
-    [ ClassTypeDecl
-        (ClassDecl
-          [Public]
-          (Ident . unpack $ name)
-          []
-          Nothing
-          []
-          (ClassBody . toClassMembers . fromMaybe empty . _schemaProperties $ schema))]
+  CompilationUnit Nothing [] {- Imports go here -}
+    [ClassTypeDecl . toClass [Public] $ (name, schema)]
+
+toClass :: [Modifier] -> (Text, Schema) -> ClassDecl
+toClass modifiers (name, schema) =
+  ClassDecl modifiers (Ident . unpack . toTypeIdent $ name) [] Nothing []
+    (ClassBody . toClassMembers . fromMaybe empty . _schemaProperties $ schema)
 
 toClassMembers :: HashMap Text Schema -> [Decl]
 toClassMembers m =
-  [toField, toGetter, toSetter] <*> toList m
+  fieldsAndMethods m ++ innerClasses m
+
+  where
+    innerClasses :: HashMap Text Schema -> [Decl]
+    innerClasses =
+      mapMaybe toInnerClass . toList
+
+    fieldsAndMethods :: HashMap Text Schema -> [Decl]
+    fieldsAndMethods m =
+      [toField, toGetter, toSetter] <*> toList m
 
 toField :: (Text, Schema) -> Decl
 toField (name, schema) =
   MemberDecl $
-    FieldDecl
-      [Private]
-      (RefType . ClassRefType . toType $ (name, schema))
+    FieldDecl [Private] (RefType . ClassRefType . toType $ (name, schema))
       [VarDecl (VarId (Ident . unpack $ name)) Nothing]
 
-toInnerClass :: (Text, Schema) -> Decl
+toInnerClass :: (Text, Schema) -> Maybe Decl
 toInnerClass (name, schema) =
-  undefined
+  case _schemaType schema of
+    Just (TypeValidatorString "object") ->
+      Just .
+        MemberDecl .
+          MemberClassDecl .
+            toClass [Public, Static] $ (name, schema)
+
+    Just (TypeValidatorString "array") ->
+      toInnerClass (name, fromJust . toSubschema $ schema)
+
+    _ ->
+      Nothing
 
 toGetter :: (Text, Schema) -> Decl
 toGetter (name, schema) =
@@ -48,27 +63,46 @@ toGetter (name, schema) =
       [Public]
       []
       (Just . RefType . ClassRefType . toType $ (name, schema))
-      (Ident . (++) "get" . unpack . toTitle $ name)
+      (Ident . getterName $ name)
       []
       []
-      (MethodBody . Just $ Block [BlockStmt . Return . Just . FieldAccess $ PrimaryFieldAccess This (Ident . unpack $ name)])
+      (MethodBody . Just $ Block
+         [ BlockStmt .
+             Return .
+               Just .
+                 FieldAccess .
+                   PrimaryFieldAccess This
+                     $ (Ident . unpack $ name)
+         ])
+
+  where
+    getterName :: Text -> String
+    getterName = (++) "get" . unpack . toTitle
 
 toSetter :: (Text, Schema) -> Decl
 toSetter (name, schema) =
   MemberDecl $
     MethodDecl
-    [Public]
-    []
-    Nothing
-    (Ident . (++) "set" . unpack . toTitle $ name)
-    [FormalParam [] (RefType . ClassRefType . toType $ (name, schema)) False (VarId . Ident . unpack $ name)]
-    []
-    (MethodBody . Just $ Block
-      [BlockStmt . ExpStmt $
-        Assign
-        (FieldLhs . PrimaryFieldAccess This . Ident . unpack $ name)
-        EqualA . ExpName $ Name [Ident . unpack $ name]])
+      [Public]
+      []
+      Nothing
+      (Ident . setterName $ name)
+      [ FormalParam
+          []
+          (RefType . ClassRefType . toType $ (name, schema))
+          False
+          (VarId . Ident . unpack $ name) ]
+      []
+      (MethodBody . Just . Block $
+         [ BlockStmt . ExpStmt $
+           Assign
+             (FieldLhs . PrimaryFieldAccess This . Ident . unpack $ name)
+             EqualA . ExpName $ Name [Ident . unpack $ name]
+         ])
 
+  where
+    setterName :: Text -> String
+    setterName = (++) "set" . unpack . toTitle
 
 toType :: (Text, Schema) -> ClassType
 toType (name, schema) =
@@ -90,6 +124,7 @@ toType (name, schema) =
 
     _ ->
       simpleClassType "Object"
+
   where
     simpleClassType :: String -> ClassType
     simpleClassType t =
@@ -102,16 +137,15 @@ toType (name, schema) =
         [ActualType . ClassRefType $ toType (name, fromJust . toSubschema $ s)])
       ]
 
-    toSubschema :: Schema -> Maybe Schema
-    toSubschema schema =
-      case _schemaItems schema of
-        Just (ItemsObject subschema) ->
-          Just subschema
+toSubschema :: Schema -> Maybe Schema
+toSubschema schema =
+  case _schemaItems schema of
+    Just (ItemsObject subschema) ->
+      Just subschema
 
-        _ ->
-          Nothing
+    _ ->
+      Nothing
 
 toTypeIdent :: Text -> Text
 toTypeIdent =
   toTitle . singularize
-

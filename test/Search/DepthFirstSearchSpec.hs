@@ -10,7 +10,7 @@ import           Data.Vector             as V (fromList)
 import           Search.DepthFirstSearch
 
 spec :: Spec
-spec = do
+spec =
   describe "Traversing an Ast" $ do
     let ast = Object
                 (HMS.fromList
@@ -25,10 +25,10 @@ spec = do
                    ])
     let found = traverseAst ast isLeaf
 
-    it "should visit each node once" $ do
+    it "should visit each node once" $
       length found `shouldBe` 5
 
-    it "should find all leaves" $ do
+    it "should find all leaves" $
       found `shouldBe` [ String "evil"
                        , String "durian"
                        , String "cherry"
