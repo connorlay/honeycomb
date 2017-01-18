@@ -14,7 +14,8 @@ import           Text.Countable                (singularize)
 
 toJava :: Text -> Schema -> CompilationUnit
 toJava name schema =
-  CompilationUnit Nothing [] {- Imports go here -}
+  CompilationUnit Nothing
+    [ImportDecl False (Name [Ident "java",Ident "util",Ident "List"]) False]
     [ClassTypeDecl . toClass [Public] $ (name, schema)]
 
 toClass :: [Modifier] -> (Text, Schema) -> ClassDecl

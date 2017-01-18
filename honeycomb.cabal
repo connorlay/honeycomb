@@ -65,6 +65,7 @@ test-suite honeycomb-test
                      , vector >= 0.11
                      , text >= 1.2
                      , language-java >= 0.2
+                     , hjsonschema >= 1.2.0.2
                      , hspec
                      , QuickCheck
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
