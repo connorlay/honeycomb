@@ -8,10 +8,10 @@ import           Data.Maybe                    (fromJust, fromMaybe, mapMaybe)
 import           Data.Text                     (Text (..), toTitle, unpack)
 import           Data.Validator.Draft4.Any     (TypeValidator (..))
 import           Data.Validator.Draft4.Array   (Items (..))
-import           Debug.Trace
 import           Language.Java.Syntax
 import           Text.Countable                (singularize)
 
+{- TODO: refactor to include error messages -}
 toJava :: Text -> Schema -> CompilationUnit
 toJava name schema =
   CompilationUnit Nothing
@@ -42,6 +42,7 @@ toField (name, schema) =
     FieldDecl [Private] (RefType . ClassRefType . toType $ (name, schema))
       [VarDecl (VarId (Ident . unpack $ name)) Nothing]
 
+{- TODO: refactor to remove unsafe fromJust call -}
 toInnerClass :: (Text, Schema) -> Maybe Decl
 toInnerClass (name, schema) =
   case _schemaType schema of

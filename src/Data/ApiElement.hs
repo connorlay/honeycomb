@@ -18,7 +18,9 @@ import qualified Data.Vector                   as V (elem, fromList)
 {- TODO: refactor with Lenses? -}
 isASchema :: Value -> Bool
 isASchema v =
-  maybe False (arrayElem $ String "messageBodySchema")
+  maybe
+    False
+    (arrayElem $ String "messageBodySchema")
     (objectLookup "classes" =<< objectLookup "meta" v)
 
 asJsonSchema :: Value -> Maybe Schema
@@ -26,8 +28,8 @@ asJsonSchema v =
   either (\_ -> Nothing) (\v -> Just v)
   <$> decodeJson
   =<< fromStrict
-      <$> encodeUtf8
-      <$> (asText =<< objectLookup "content" v)
+  <$> encodeUtf8
+  <$> (asText =<< objectLookup "content" v)
 
 objectLookup :: Text -> Value -> Maybe Value
 objectLookup k (Object m) = k `HMS.lookup` m
