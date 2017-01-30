@@ -1,8 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Language.JavaSpec (spec) where
+module CodeGen.JavaSpec (spec) where
 
-import           Language.Java        (toJava)
+import           CodeGen.Java        (toJava)
 import           Language.Java.Pretty (prettyPrint)
 import           Test.Hspec
 import           Helper

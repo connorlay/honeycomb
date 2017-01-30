@@ -7,7 +7,7 @@ import           Data.ApiElement
 import           Data.ByteString.Lazy     as B (readFile)
 import           Data.Json                     (decodeJson)
 import           Data.JsonSchema.Draft4.Schema (Schema)
-import           Language.Java
+import           CodeGen.Java
 import           Language.Java.Pretty
 import           Network.Apiary                (parseApib)
 import           Search.DepthFirstSearch

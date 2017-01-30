@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Language.Java (toJava) where
+module CodeGen.Java (toJava) where
 
 import           Data.HashMap.Lazy             (HashMap (..), empty, toList)
 import           Data.JsonSchema.Draft4.Schema (Schema (..))
