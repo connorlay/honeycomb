@@ -20,6 +20,7 @@ library
                      , Search.DepthFirstSearch
                      , Data.ApiElement
                      , CodeGen.Java
+                     , JsonSchema.References
   build-depends:       base >= 4.7 && < 5
                      , aeson >= 1.0
                      , wreq >= 0.4
