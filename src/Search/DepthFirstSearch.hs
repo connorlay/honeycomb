@@ -16,6 +16,7 @@ instance Expandable Value where
       Array a  -> V.toList a
       _        -> []
 
+{- TODO: swap arguments -}
 traverseAst :: (Expandable a) => a -> (a -> Bool) -> [a]
 traverseAst ast predicate =
   dfs ast [] []

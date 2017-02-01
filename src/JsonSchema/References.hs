@@ -30,4 +30,9 @@ toSubschema schema =
     _ ->
       Nothing
 
-
+collectRefs :: Schema -> [String]
+collectRefs schema =
+  traverseAst schema isARef
+  where
+    isARef :: Schema -> Bool
+    isARef = isJust . _schemaRef
