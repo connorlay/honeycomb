@@ -9,6 +9,7 @@ import           Data.Validator.Draft4.Array   (Items (..))
 import           Data.Maybe                    (catMaybes, fromMaybe, maybeToList, isJust)
 import           Data.HashMap.Lazy             (HashMap (..), empty, toList)
 import           Data.Text                     (Text)
+import           Data.List                     (nub)
 
 instance Expandable Schema where
   expand schema =
@@ -33,7 +34,7 @@ toSubschema schema =
 
 collectRefs :: Schema -> [Text]
 collectRefs schema =
-  catMaybes . map _schemaRef . traverseAst schema $ isARef
+  nub . catMaybes . map _schemaRef . traverseAst schema $ isARef
   where
     isARef :: Schema -> Bool
     isARef = isJust . _schemaRef

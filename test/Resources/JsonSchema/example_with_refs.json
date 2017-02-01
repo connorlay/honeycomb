@@ -1,0 +1,25 @@
+{
+  "definitions" : {
+    "person" : {
+      "type" : "object"
+    },
+    "cat" : {
+      "type" : "object"
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "mother" : {
+      "$ref" : "#/definitions/person"
+    },
+    "father" : {
+      "$ref" : "#/definitions/person"
+    },
+    "cats" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/cat"
+      }
+    }
+  }
+}
