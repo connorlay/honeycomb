@@ -38,3 +38,7 @@ collectRefs schema =
   where
     isARef :: Schema -> Bool
     isARef = isJust . _schemaRef
+
+resolveRefs :: [Text] -> HashMap Text Schema
+resolveRefs refs =
+  undefined
