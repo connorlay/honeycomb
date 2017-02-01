@@ -1,10 +1,26 @@
 {
   "definitions" : {
     "person" : {
-      "type" : "object"
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "occupation" : {
+          "type" : "string"
+        }
+      }
     },
     "cat" : {
-      "type" : "object"
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "breed" : {
+          "type" : "string"
+        }
+      }
     }
   },
   "type" : "object",

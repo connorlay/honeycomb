@@ -6,8 +6,9 @@ import           Search.DepthFirstSearch
 import           Data.JsonSchema.Draft4.Schema (Schema (..))
 import           Data.Validator.Draft4.Any     (TypeValidator (..))
 import           Data.Validator.Draft4.Array   (Items (..))
+import           Data.Validator.Reference
 import           Data.Maybe                    (catMaybes, fromMaybe, maybeToList, isJust)
-import           Data.HashMap.Lazy             (HashMap (..), empty, toList)
+import           Data.HashMap.Lazy             (HashMap (..), empty, toList, fromList)
 import           Data.Text                     (Text)
 import           Data.List                     (nub)
 
@@ -32,13 +33,25 @@ toSubschema schema =
     _ ->
       Nothing
 
-collectRefs :: Schema -> [Text]
+type Ref = Text
+type SchemaAndRefs = (Schema, [Ref])
+type SchemaAndRefMap = (Schema, HashMap Ref Schema)
+
+collectRefs :: Schema -> SchemaAndRefs
 collectRefs schema =
-  nub . catMaybes . map _schemaRef . traverseAst schema $ isARef
+  (schema, nub . catMaybes . map _schemaRef . traverseAst schema $ isARef)
   where
     isARef :: Schema -> Bool
     isARef = isJust . _schemaRef
 
-resolveRefs :: [Text] -> HashMap Text Schema
-resolveRefs refs =
-  undefined
+resolveRefs :: SchemaAndRefs -> SchemaAndRefMap
+resolveRefs (schema, refs) =
+  (schema, fromList . catMaybes . map (resolveRef schema) $ refs)
+    where
+      resolveRef :: Schema -> Ref -> Maybe (Text, Schema)
+      resolveRef schema ref =
+        case resolveFragment (snd . resolveReference Nothing $ ref) schema of
+          Just schema' -> Just (ref, schema')
+          Nothing -> Nothing
+
+
