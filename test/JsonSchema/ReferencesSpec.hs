@@ -26,9 +26,10 @@ spec =
 
     describe "Resolving json schema refs" $ do
       let path = "./test/Resources/JsonSchema/example_with_refs.json"
-      let schema = readSchema path
-      let refMap = resolveRefs <$> collectRefs <$> schema
+      let refMap = resolveRefs <$> collectRefs <$> readSchema path
 
       it "should resolve all referenced schemas" $ do
-        let expected = fromList []
+        let expected = fromList [ ("#/definitions/person", emptySchema { _schemaId = Just "http://example.com/person" })
+                                , ("#/definitions/cat", emptySchema { _schemaId = Just "http://example.com/cat" })
+                                ]
         (snd <$> refMap) `shouldReturn` expected
