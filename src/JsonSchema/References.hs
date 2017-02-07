@@ -34,24 +34,29 @@ toSubschema schema =
       Nothing
 
 type Ref = Text
+type Name = Text
 type SchemaAndRefs = (Schema, [Ref])
 type SchemaAndRefMap = (Schema, HashMap Ref Schema)
 
-collectRefs :: Schema -> SchemaAndRefs
+data CodeGenUnit = CodeGenUnit Name Schema (HashMap Ref Schema)
+
+prepareSchema :: Name -> Schema -> CodeGenUnit
+prepareSchema name schema =
+  CodeGenUnit name schema . resolveRefs schema . collectRefs $ schema
+
+collectRefs :: Schema -> [Ref]
 collectRefs schema =
-  (schema, nub . catMaybes . map _schemaRef . traverseAst schema $ isARef)
+  nub . catMaybes . map _schemaRef . traverseAst schema $ isARef
   where
     isARef :: Schema -> Bool
     isARef = isJust . _schemaRef
 
-resolveRefs :: SchemaAndRefs -> SchemaAndRefMap
-resolveRefs (schema, refs) =
-  (schema, fromList . catMaybes . map (resolveRef schema) $ refs)
+resolveRefs :: Schema -> [Ref] -> HashMap Ref Schema
+resolveRefs schema refs =
+  fromList . catMaybes . map (resolveRef schema) $ refs
     where
       resolveRef :: Schema -> Ref -> Maybe (Text, Schema)
       resolveRef schema ref =
         case resolveFragment (snd . resolveReference Nothing $ ref) schema of
           Just schema' -> Just (ref, schema')
           Nothing -> Nothing
-
-
