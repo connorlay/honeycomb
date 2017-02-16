@@ -5,11 +5,12 @@ module Language.Java (toJava) where
 import           Data.HashMap.Lazy             (HashMap (..), empty, toList)
 import           Data.JsonSchema.Draft4.Schema (Schema (..))
 import           Data.Maybe                    (fromJust, fromMaybe, mapMaybe)
-import           Data.Text                     (Text (..), toTitle, unpack)
+import           Data.Text                     (Text (..), toTitle, unpack, pack)
 import           Data.Validator.Draft4.Any     (TypeValidator (..))
 import           Data.Validator.Draft4.Array   (Items (..))
 import           Language.Java.Syntax
 import           Text.Countable                (singularize)
+import           Data.Char as Char             (toUpper)
 
 {- TODO: refactor to include error messages -}
 toJava :: Text -> Schema -> CompilationUnit
@@ -79,7 +80,7 @@ toGetter (name, schema) =
 
   where
     getterName :: Text -> String
-    getterName = (++) "get" . unpack . toTitle
+    getterName = (++) "get" . uppercase . unpack
 
 toSetter :: (Text, Schema) -> Decl
 toSetter (name, schema) =
@@ -104,7 +105,7 @@ toSetter (name, schema) =
 
   where
     setterName :: Text -> String
-    setterName = (++) "set" . unpack . toTitle
+    setterName = (++) "set" . uppercase . unpack
 
 toType :: (Text, Schema) -> ClassType
 toType (name, schema) =
@@ -150,4 +151,8 @@ toSubschema schema =
 
 toTypeIdent :: Text -> Text
 toTypeIdent =
-  toTitle . singularize
+  pack . uppercase . unpack . singularize
+
+uppercase :: String -> String
+uppercase (x:xs) = Char.toUpper x : xs
+uppercase [] = []
